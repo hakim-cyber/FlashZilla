@@ -112,7 +112,7 @@ struct ContentView: View {
                                 .clipShape(Circle())
                         }
                         .accessibilityLabel("Wrong")
-                        .accessibilityHint("Mark your answer as being incorrec")
+                        .accessibilityHint("Mark your answer as being incorrect")
 
                         Spacer()
 
