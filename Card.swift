@@ -8,7 +8,8 @@
 import Foundation
 import SwiftUI
 
-struct Card :Codable,Hashable{
+struct Card :Codable,Hashable,Identifiable{
+    var id = UUID()
     let prompt :String
     let answer : String
     

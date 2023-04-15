@@ -1,9 +1,13 @@
 import SwiftUI
 
 extension View {
-    func stacked(at position: Int, in total: Int) -> some View {
-        let offset = Double(total - position)
-        return self.offset(x: 0, y: offset * 10)
+    func stacked(at position: Card, in total: [Card]) -> some View {
+        let totalIndex = total.count
+        if let positionIndex = try? total.firstIndex(of: position){
+            let offset = Double(totalIndex - positionIndex)
+            return self.offset(x: 0, y: offset * 10)
+        }
+        return self.offset(x: 0,y: 0)
     }
 }
 
@@ -49,10 +53,10 @@ struct ContentView: View {
                 }
 
                 ZStack {
-                    ForEach(0..<cards.count, id: \.self) { index in
-                        CardView(card: cards[index]) { result in
+                    ForEach(cards) { card in
+                        CardView(card: card) { result in
                             withAnimation {
-                                removeCard(at: index,result: result)
+                                removeCard(card: card,result: result)
                                 if result{
                                     score += 1
                                 }else{
@@ -60,9 +64,9 @@ struct ContentView: View {
                                 }
                             }
                         }
-                        .stacked(at: index, in: cards.count)
-                        .allowsHitTesting(index == cards.count - 1)
-                        .accessibilityHidden(index < cards.count - 1)
+                        .stacked(at: card, in: cards)
+                        .allowsHitTesting(cards.firstIndex(of: card) == cards.count - 1)
+                        .accessibilityHidden(cards.firstIndex(of: card)! < cards.count - 1)
                     }
                 }
                 .allowsHitTesting(timeRemaining > 0)
@@ -166,20 +170,29 @@ struct ContentView: View {
             }
         }
     }
-    func removeCard(at index: Int,result:Bool) {
-        guard index >= 0 else { return }
-        if result{
-            cards.remove(at: index)
-        }else{
-            withAnimation {
-                
-                
-                let wrongCard =  cards.remove(at: index)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5){
-                    cards.insert(wrongCard, at: 0)
+    func removeCard(card :Card,result:Bool) {
+        if let index  = try? cards.firstIndex(of: card){
+            guard index  >= 0 else { return }
+            if result{
+                withAnimation {
+                    cards.remove(at: index)
                 }
+               
+            }else{
+                withAnimation {
+                    withAnimation {
+                    
+                    let wrongCard =  cards.remove(at: index)
+                    let newCard = Card(prompt: wrongCard.prompt, answer: wrongCard.answer)
+                    
+                        cards.insert(newCard, at: 0)
+                    
+                    }
+                       
+                    
+                }
+                
             }
-            
         }
 
         if cards.isEmpty {
